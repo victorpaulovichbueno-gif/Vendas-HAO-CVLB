@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BI de Vendas</title>
+    
+    <!-- Biblioteca Chart.js para os gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
+    <!-- Fonte do Google para um visual mais moderno -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* ============== ESTILOS GERAIS (CSS ) ============== */
+    :root {
+        --primary-color: #0052cc;
+        --primary-light: #e6f0ff;
+        --secondary-color: #5E6C84;
+        --danger-color: #dc3545;
+        --success-color: #00875A;
+        --warning-color: #ffab00;
+        
+        --bg-color: #f4f5f7;
+        --card-bg-color: #ffffff;
+        --text-color: #172B4D;
+        --border-color: #dfe1e6;
+        --shadow: 0px 4px 8px rgba(9, 30, 66, 0.06), 0px 0px 1px rgba(9, 30, 66, 0.31);
+        --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+        font-family: var(--font-family);
+        margin: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* ============== TELA DE LOGIN ============== */
+    @keyframes smoke-animation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .login-screen-wrapper {
+        background: linear-gradient(-45deg, #000000, #222222, #444444, #111111, #000000);
+        background-size: 400% 400%;
+        animation: smoke-animation 25s ease infinite;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .login-page-container {
+        width: 100%;
+        max-width: 950px;
+        background-color: var(--card-bg-color);
+        border-radius: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .login-container {
+        flex: 1.2;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .login-container h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-color);
+    }
+
+    .login-container p {
+        color: var(--secondary-color);
+        margin-bottom: 30px;
+        font-size: 1rem;
+    }
+    
+    #login-error {
+        color: var(--danger-color);
+        background-color: #ffebee;
+        border: 1px solid var(--danger-color);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="date"],
+    input[type="number"],
+    select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-family: var(--font-family);
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s;
+    }
+    
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    button[type="submit"] {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        background-color: var(--primary-color);
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #0041a3;
+    }
+
+    .login-image-container {
+        flex: 1.4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 0%;
+        overflow: hidden;
+    }
+
+/* ================================================================== */
+/* BLOCO 2: ADIÇÃO NO CSS (Alinhamento dos Logos no Header)           */
+/* ================================================================== */
+
+.header-title-container {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Espaçamento entre os logos e o título */
+}
+.header-title-container h2 {
+    margin: 0; /* Remove margens padrão do h2 para melhor alinhamento */
+}
+
+    /* ============== ESTILOS DA TELA PRINCIPAL (DASHBOARD) ============== */
+    .app-container {
+        width: 100%;
+        max-width: 1600px;
+        padding: 20px;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--card-bg-color);
+        padding: 15px 30px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        margin-bottom: 25px;
+    }
+    
+    .main-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .main-header nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        background-color: var(--bg-color);
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .main-header nav a {
+        text-decoration: none;
+        color: var(--secondary-color);
+        padding: 8px 18px;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .main-header nav a.active-tab {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 82, 204, 0.3);
+    }
+    
+    #logout-btn {
+        padding: 8px 16px;
+        border: none;
+        background-color: var(--danger-color);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        font-family: var(--font-family);
+        transition: background-color 0.3s;
+    }
+    
+    #logout-btn:hover {
+        background-color: #b02a37;
+    }
+
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.5s;
+    }
+
+    .tab-content.active-content {
+        display: block;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* FILTROS */
+    .filters-container {
+        background-color: var(--card-bg-color);
+        padding: 15px 30px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        margin-bottom: 25px;
+        display: flex;
+        gap: 25px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+    .filters-container .form-group {
+        margin-bottom: 0;
+    }
+
+    /* CARDS */
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+
+    .card {
+        background-color: var(--card-bg-color);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .card:nth-child(2) { border-left-color: var(--success-color); }
+    .card:nth-child(3) { border-left-color: var(--warning-color); }
+    .card:nth-child(4) { border-left-color: var(--secondary-color); }
+
+    .card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--secondary-color);
+    }
+
+    .card p {
+        margin: 0;
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+    
+    /* GRÁFICOS */
+    .charts-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+
+    .chart-wrapper {
+    background-color: var(--card-bg-color);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    height: 500px; /* <--- AQUI ESTÁ A ALTURA */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-height: 0; 
+}
+/* ================================================================== */
+/* BLOCO DE CÓDIGO PARA AJUSTAR O TAMANHO DO GRÁFICO DENTRO DO CONTAINER */
+/* ================================================================== */
+
+.chart-wrapper canvas {
+    max-width: 100%;
+    max-height: 94%;
+}
+
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* FORMULÁRIOS DE CADASTRO E LANÇAMENTO */
+    form {
+        background-color: var(--card-bg-color);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px 25px;
+        align-items: flex-end;
+    }
+    
+    form h2 {
+        grid-column: 1 / -1;
+        margin: 0 0 10px 0;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    hr {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 40px 0;
+    }
+
+    /* TABELAS */
+    .table-wrapper {
+        background-color: var(--card-bg-color);
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+    }
+    
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    thead th {
+        background-color: #FAFBFC;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+    }
+
+    tbody tr:hover {
+        background-color: #f4f5f7;
+    }
+    
+    section > h2, .table-header-controls h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    /* Botões de Ação nas Tabelas (Editar/Excluir) */
+    .actions-cell {
+        display: flex;
+        gap: 10px;
+    }
+    .btn-table-action {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        border: 1px solid transparent;
+    }
+    .btn-table-edit {
+        border-color: var(--warning-color);
+        background-color: transparent;
+        color: var(--warning-color);
+    }
+    .btn-table-edit:hover {
+        background-color: var(--warning-color);
+        color: white;
+    }
+    .btn-table-delete {
+        border-color: var(--danger-color);
+        background-color: transparent;
+        color: var(--danger-color);
+    }
+    .btn-table-delete:hover {
+        background-color: var(--danger-color);
+        color: white;
+    }
+
+    /* Botão de Cancelar Padronizado */
+    .btn-cancel {
+        background-color: var(--secondary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 14px 20px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.3s;
+    }
+    .btn-cancel:hover {
+        background-color: #495568;
+    }
+
+    /* Contêiner de Ações do Formulário */
+    .form-actions {
+        grid-column: 4 / 5;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        align-items: center;
+    }
+    .form-actions button {
+        width: auto;
+        padding: 14px 20px;
+    }
+    
+    /* Header da Tabela de Vendas (Título + Exportar) */
+    .table-header-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .table-header-controls h2 {
+        margin: 0;
+    }
+    #export-vendas-btn {
+        background-color: var(--success-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    #export-vendas-btn:hover {
+        background-color: #006a48;
+    }
+    
+    /* Estilos para o modo de edição */
+    form.editing-mode input, form.editing-mode select {
+        background-color: var(--primary-light) !important;
+        border-color: var(--primary-color) !important;
+    }
+
+    /* Layout em Grid para o formulário de Vendas */
+    .form-vendas-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px 25px;
+    }
+    .form-vendas-grid h2 { grid-column: 1 / -1; }
+    .form-vendas-grid .form-actions { grid-column: 4 / 5; }
+
+    /* Estilo para Rádio Buttons customizados */
+    .radio-group {
+        display: flex;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+        width: fit-content;
+        height: 45px;
+        box-sizing: border-box;
+    }
+    .radio-group input[type="radio"] {
+        display: none;
+    }
+    .radio-group label {
+        padding: 12px 18px;
+        cursor: pointer;
+        margin: 0;
+        transition: background-color 0.3s, color 0.3s;
+        color: var(--secondary-color);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    .radio-group input[type="radio"]:checked + label {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    body.dark-mode .radio-group { border-color: #4a596a; }
+    body.dark-mode .radio-group label { color: #8c9bab; }
+    body.dark-mode .radio-group input[type="radio"]:checked + label { background-color: var(--primary-color); color: white; }
+
+    /* Alinhamento dos botões de formulário (Lojas) */
+    .form-actions-loja-ajustado {
+        grid-column: 2 / -1;
+        justify-self: end;
+    }
+    .form-actions-loja-ajustado button {
+        width: auto;
+        padding: 14px 25px;
+    }
+
+
+    /* Novo container de gráficos com 3 colunas */
+    .charts-container-3-cols {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+
+    /* ============== ESTILOS PARA O MODO ESCURO (DARK MODE) ============== */
+    body.dark-mode {
+        --primary-color: #388bff;
+        --primary-light: rgba(56, 139, 255, 0.15);
+        --secondary-color: #8c9bab;
+        
+        --bg-color: #111111;
+        --card-bg-color: #212b36;
+        --text-color: #f0f2f5;
+        --border-color: #394451;
+        --shadow: 0px 4px 8px rgba(0, 0, 0, 0.1), 0px 0px 1px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark-mode .login-page-container {
+        --card-bg-color: #ffffff;
+        --text-color: #172B4D;
+        --secondary-color: #5E6C84;
+        --border-color: #dfe1e6;
+    }
+    body.dark-mode .login-page-container input {
+        background-color: #ffffff;
+        color: #172B4D;
+        border-color: #dfe1e6;
+    }
+    
+    body.dark-mode thead th {
+        background-color: #1c2530;
+    }
+
+    body.dark-mode tbody tr:hover {
+        background-color: #2c3846;
+    }
+    
+    body.dark-mode input, body.dark-mode select {
+        background-color: #2c3846;
+        color: var(--text-color);
+        border-color: #4a596a;
+    }
+    
+    body.dark-mode input[readonly] {
+        background-color: #394451;
+    }
+
+    body.dark-mode #login-error { background-color: rgba(220, 53, 69, 0.2); }
+    body.dark-mode .main-header nav ul { background-color: var(--bg-color); }
+    body.dark-mode form.editing-mode input, body.dark-mode form.editing-mode select {
+        background-color: rgba(56, 139, 255, 0.2) !important;
+    }
+
+    body.dark-mode .main-header h2 {
+        color: white;
+    }
+
+    /* ============== ESTILOS PARA O BOTÃO DE TEMA ============== */
+    #theme-toggle-btn {
+        background: none;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: var(--secondary-color);
+        transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    
+    #theme-toggle-btn:hover {
+        background-color: var(--primary-light);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+    
+    #theme-toggle-btn svg {
+        pointer-events: none;
+    }
+
+    /* ============== ESTILOS PARA A ABA DE PRODUTOS ============== */
+    .produto-valor-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .produto-valor-display {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-color);
+        min-width: 120px;
+        display: inline-block;
+    }
+    .produto-valor-input {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-color);
+        border: 2px solid var(--primary-color);
+        text-align: center;
+        width: 120px;
+    }
+    .edit-valor-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--secondary-color);
+        padding: 5px;
+        font-size: 1.2rem;
+    }
+    .edit-valor-btn:hover {
+        color: var(--primary-color);
+    }
+    #tabela-produtos-lista td:nth-child(1) {
+        font-weight: 600;
+    }
+    #tabela-produtos-lista th {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+    body.dark-mode #tabela-produtos-lista th {
+        background-color: rgba(56, 139, 255, 0.2);
+        color: var(--primary-color);
+    }
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: inline-block;
+        transition: transform 0.2s;
+    }
+    .status-dot:hover {
+        transform: scale(1.2);
+    }
+    .status-dot.ativo {
+        background-color: var(--success-color);
+    }
+    .status-dot.inativo {
+        background-color: var(--danger-color);
+    }
+
+
+    /* ============== ESTILOS PARA O MODAL DE CONFIRMAÇÃO ============== */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeIn 0.3s;
+    }
+    .modal-content {
+        background-color: var(--card-bg-color);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        width: 90%;
+        max-width: 450px;
+        text-align: center;
+    }
+    .modal-content h3 {
+        margin-top: 0;
+        font-size: 1.3rem;
+    }
+    .modal-content p {
+        margin: 15px 0 25px 0;
+        color: var(--secondary-color);
+    }
+    .modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+    .modal-actions button {
+        padding: 10px 25px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    #modal-confirm-btn {
+        background-color: var(--success-color);
+        color: white;
+    }
+    #modal-cancel-btn {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+
+    /* ============== ESTILOS PARA O FEEDBACK DE SUCESSO ============== */
+    .feedback-success {
+        background-color: var(--success-color);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: 500;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+    .feedback-success.show {
+        opacity: 1;
+    }
+</style>
+</head>
+<body>
+
+    <!-- ======================= TELA DE LOGIN (HTML) ======================= -->
+    <div id="login-screen" class="login-screen-wrapper">
+        <div class="login-page-container">
+            <div class="login-container">
+                <header class="login-header">
+                    <img src="https://victorpaulovichbueno-gif.github.io/logo-HAO/logohao" alt="Logo Haojue" style="height: 40px;">
+                    <img src="https://assets.decocache.com/cvlbinsticiona/883934cf-cd5a-4b86-ac4c-d3504faa99ab/logo-inst-desk.svg" alt="Logo Casa & Vídeo" style="height: 45px;">
+                </header>
+                <h1>Controle de Vendas</h1>
+                <p>Acesse para gerenciar suas operações.</p>
+                <form id="login-form">
+                    <div id="login-error" class="hidden">Login ou senha inválidos.</div>
+                    <div class="form-group">
+                        <label for="username">Login:</label>
+                        <input type="text" id="username" name="username" value="ricardo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Senha:</label>
+                        <input type="password" id="password" name="password" value="123" required>
+                    </div>
+                    <button type="submit">Entrar</button>
+                </form>
+            </div>
+            <div class="login-image-container">
+                <img src="https://victorpaulovichbueno-gif.github.io/FOTO-HAO/unnamed.jpg" alt="Moto Elétrica Macchina" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================= TELA PRINCIPAL (HTML ) ======================= -->
+    <div id="app-screen" class="app-container hidden">
+        <!-- ================================================================== -->
+<!-- BLOCO 1: ALTERAÇÃO NO HTML (Header Principal)                     -->
+<!-- ================================================================== -->
+
+<header class="main-header">
+    <div class="header-title-container">
+        <img src="https://victorpaulovichbueno-gif.github.io/logo-HAO/logohao" alt="Logo Haojue" style="height: 35px;">
+        <img src="https://assets.decocache.com/cvlbinsticiona/883934cf-cd5a-4b86-ac4c-d3504faa99ab/logo-inst-desk.svg" alt="Logo Casa & Vídeo" style="height: 40px;">
+        <h2>Controle de Venda</h2>
+    </div>
+    <div class="header-controls">
+        <!-- ... (resto do conteúdo do header ) ... -->
+
+                <nav>
+                    <ul>
+                        <li><a href="#dashboard" class="nav-tab active-tab" data-tab="dashboard">Dashboard</a></li>
+                        <li><a href="#vendas" class="nav-tab" data-tab="vendas">Vendas</a></li>
+                        <li><a href="#lojas" class="nav-tab" data-tab="lojas">Lojas</a></li>
+                        <li><a href="#produtos" class="nav-tab" data-tab="produtos">Produtos</a></li>
+                    </ul>
+                </nav>
+                <button id="theme-toggle-btn" title="Alternar tema">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <button id="logout-btn">Sair</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- SEÇÃO 1: DASHBOARD -->
+            <section id="dashboard" class="tab-content active-content">
+                <div class="filters-container">
+                    <div class="form-group">
+                        <label for="filter-month">Mês:</label>
+                        <select id="filter-month"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-year">Ano:</label>
+                        <select id="filter-year"></select>
+                    </div>
+                </div>
+                <div class="cards-container">
+                    <div class="card"><h3 id="card-venda-total-label">Venda Total</h3><p id="card-venda-total">R$ 0,00</p></div>
+                    <div class="card"><h3 id="card-unidades-label">Unidades</h3><p id="card-unidades">0</p></div>
+                    <div class="card"><h3 id="card-ticket-medio-label">Ticket Médio</h3><p id="card-ticket-medio">R$ 0,00</p></div>
+                    <div class="card"><h3 id="card-venda-media-label">Venda Média/Dia</h3><p id="card-venda-media">R$ 0,00</p></div>
+                </div>
+                
+                <div class="charts-container-3-cols">
+                    <div class="chart-wrapper"><div class="chart-title">Ranking de Venda (Unidades por Modelo)</div><canvas id="ranking-modelo-chart"></canvas></div>
+                    <div class="chart-wrapper"><div class="chart-title">Ranking de Venda (Unidades por Loja)</div><canvas id="ranking-lojas-chart"></canvas></div>
+                    <div class="chart-wrapper"><div class="chart-title">Participação de Venda (Unidades por Loja %)</div><canvas id="participacao-lojas-chart"></canvas></div>
+                </div>
+                <div class="charts-container-3-cols">
+                    <div class="chart-wrapper"><div class="chart-title">Venda (Unidades por Tipo de Loja)</div><canvas id="venda-tipo-loja-chart"></canvas></div>
+                    <div class="chart-wrapper"><div class="chart-title">Venda (Unidades por Gerente)</div><canvas id="ranking-grc-chart"></canvas></div>
+                    <div class="chart-wrapper"><div class="chart-title">Venda (Unidades por Forma de Pagamento)</div><canvas id="venda-forma-pagamento-chart"></canvas></div>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-wrapper"><div class="chart-title">Venda Total por Dia</div><canvas id="venda-dia-chart"></canvas></div>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-wrapper"><div class="chart-title">Venda Total por Semana</div><canvas id="venda-semana-chart"></canvas></div>
+                </div>
+                <div class="charts-container">
+                     <div class="chart-wrapper"><div class="chart-title">Venda Total Mensal (Últimos 12 Meses)</div><canvas id="venda-mensal-chart"></canvas></div>
+                </div>
+                <div class="charts-container">
+                     <div class="chart-wrapper"><div class="chart-title">Venda Total Anual (Últimos 6 Anos)</div><canvas id="venda-anual-chart"></canvas></div>
+                </div>
+
+            </section>
+
+            <!-- SEÇÃO 2: VENDAS -->
+            <section id="vendas" class="tab-content">
+                <form id="form-lancamento" class="form-vendas-grid">
+                    <h2 id="venda-form-title">Lançar Nova Venda</h2>
+                    <input type="hidden" id="venda-edit-id">
+                    
+                    <div class="form-group"><label for="venda-data">Data</label><input type="date" id="venda-data" required></div>
+                    <div class="form-group"><label for="venda-loja">Loja</label><select id="venda-loja" required></select></div>
+                    
+                    <div class="form-group">
+                        <label for="venda-tipo-loja-display">Tipo da Loja</label>
+                        <input type="text" id="venda-tipo-loja-display" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="venda-modelo">Modelo Vendido</label>
+                        <select id="venda-modelo" required></select>
+                    </div>
+
+                    <div class="form-group"><label for="venda-valor">Valor da Venda</label><input type="number" id="venda-valor" step="0.01" required></div>
+                    <div class="form-group">
+                        <label for="venda-forma-pagamento">Forma de Pagamento</label>
+                        <select id="venda-forma-pagamento" required></select>
+                    </div>
+                    <div class="form-group"><label for="venda-quantidade">Quantidade</label><input type="number" id="venda-quantidade" value="1" min="1" required></div>
+                    <div class="form-group"><label for="venda-total">Venda Total</label><input type="text" id="venda-total" readonly></div>
+
+                    <div class="form-actions">
+                        <button type="button" id="cancel-edit-venda-btn" class="hidden btn-cancel">Cancelar</button>
+                        <button type="submit" id="venda-submit-btn">Lançar Venda</button>
+                    </div>
+                </form>
+                <hr>
+                
+                <div class="table-header-controls">
+                    <h2>Vendas Lançadas</h2>
+                    <button id="export-vendas-btn">Exportar Vendas (CSV)</button>
+                </div>
+                
+                <div class="filters-container">
+                    <div class="form-group"><label for="vendas-filter-data">Data:</label><input type="date" id="vendas-filter-data"></div>
+                    <div class="form-group"><label for="vendas-filter-loja">Loja:</label><select id="vendas-filter-loja"><option value="">Todas</option></select></div>
+                    <button id="clear-vendas-filters-btn" class="btn-cancel">Limpar Filtros</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-container">
+                        <table id="tabela-vendas">
+                            <thead><tr><th>Data</th><th>Loja</th><th>Modelo</th><th>Valor</th><th>Qtd</th><th>Venda Total</th><th>Ações</th></tr></thead>
+                            <tbody id="tabela-vendas-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 3: LOJAS -->
+            <section id="lojas" class="tab-content">
+                <div id="loja-feedback-msg" class="feedback-success hidden"></div>
+                
+                <form id="form-cadastro-loja">
+                    <h2 id="loja-form-title">Cadastrar Nova Loja</h2>
+                    <input type="hidden" id="loja-edit-id">
+                    <div class="form-group"><label for="loja-nome">Nome da Loja</label><input type="text" id="loja-nome" required></div>
+                    
+                    <div class="form-group">
+                        <label>Bloco</label>
+                        <div class="radio-group">
+                            <input type="radio" id="loja-tipo-shopping" name="loja-tipo" value="Shopping" checked>
+                            <label for="loja-tipo-shopping">Shopping</label>
+                            <input type="radio" id="loja-tipo-rua" name="loja-tipo" value="Rua">
+                            <label for="loja-tipo-rua">Rua</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group"><label for="loja-data-inauguracao">Data de Inauguração</label><input type="date" id="loja-data-inauguracao" required></div>
+                    <div class="form-group"><label for="loja-grc">GRC (Gerente)</label><input type="text" id="loja-grc" required></div>
+                    <div class="form-actions-loja-ajustado">
+                        <button type="button" id="cancel-edit-loja-btn" class="hidden btn-cancel">Cancelar</button>
+                        <button type="submit" id="loja-submit-btn">Cadastrar Loja</button>
+                    </div>
+                </form>
+                <hr>
+                <h2>Lojas Cadastradas</h2>
+                <h3 id="subtitulo-lojas" style="font-weight: 400; font-size: 1rem; margin-top: -15px; margin-bottom: 20px;"></h3>
+                <div class="table-wrapper">
+                    <table id="tabela-lojas">
+                        <thead><tr><th>Loja</th><th>Bloco</th><th>Data Inauguração</th><th>GRC (Gerente)</th><th>Ações</th></tr></thead>
+                        <tbody id="tabela-lojas-body"></tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="produtos" class="tab-content">
+                <h2>Produtos Cadastrados</h2>
+                <div class="table-wrapper">
+                    <table id="tabela-produtos-lista">
+                        <thead>
+                            <tr>
+                                <th>Modelo</th>
+                                <th>Valor</th>
+                                <th>Última Alteração</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtos-lista-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="confirmation-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modal-title">Confirmar Alteração</h3>
+            <p id="modal-message">Você confirma a alteração do valor?</p>
+            <div class="modal-actions">
+                <button id="modal-cancel-btn">Cancelar</button>
+                <button id="modal-confirm-btn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+// ======================= LÓGICA DA APLICAÇÃO (JAVASCRIPT) =======================
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- ELEMENTOS DO DOM ---
+    const loginScreen = document.getElementById('login-screen');
+    const appScreen = document.getElementById('app-screen');
+    const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+    const logoutButton = document.getElementById('logout-btn');
+    const themeToggleButton = document.getElementById('theme-toggle-btn');
+
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Elementos da Seção Lojas
+    const lojaForm = document.getElementById('form-cadastro-loja');
+    const lojaFormTitle = document.getElementById('loja-form-title');
+    const lojaEditId = document.getElementById('loja-edit-id');
+    const lojaSubmitBtn = document.getElementById('loja-submit-btn');
+    const cancelEditLojaBtn = document.getElementById('cancel-edit-loja-btn');
+    const tabelaLojasBody = document.getElementById('tabela-lojas-body');
+    const subtituloLojas = document.getElementById('subtitulo-lojas');
+    const lojaFeedbackMsg = document.getElementById('loja-feedback-msg');
+    
+    // Elementos da Seção Vendas
+    const formLancamento = document.getElementById('form-lancamento');
+    const vendaFormTitle = document.getElementById('venda-form-title');
+    const vendaEditId = document.getElementById('venda-edit-id');
+    const vendaSubmitBtn = document.getElementById('venda-submit-btn');
+    const cancelEditVendaBtn = document.getElementById('cancel-edit-venda-btn');
+    const vendaLojaSelect = document.getElementById('venda-loja');
+    const vendaDataInput = document.getElementById('venda-data');
+    const tabelaVendasBody = document.getElementById('tabela-vendas-body');
+    const vendaFormaPagamentoSelect = document.getElementById('venda-forma-pagamento');
+    const vendaValorInput = document.getElementById('venda-valor');
+    const vendaQuantidadeInput = document.getElementById('venda-quantidade');
+    const vendaTotalInput = document.getElementById('venda-total');
+    const vendaModeloSelect = document.getElementById('venda-modelo');
+    const vendaTipoLojaDisplay = document.getElementById('venda-tipo-loja-display');
+
+    // Elementos da Seção Produtos
+    const produtosListaBody = document.getElementById('produtos-lista-body');
+    const modal = document.getElementById('confirmation-modal');
+    const modalMessage = document.getElementById('modal-message');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+
+
+    // Elementos de Filtros
+    const filterMonth = document.getElementById('filter-month');
+    const filterYear = document.getElementById('filter-year');
+    const exportVendasBtn = document.getElementById('export-vendas-btn');
+    const vendasFilterData = document.getElementById('vendas-filter-data');
+    const vendasFilterLoja = document.getElementById('vendas-filter-loja');
+    const clearVendasFiltersBtn = document.getElementById('clear-vendas-filters-btn');
+
+    // --- BANCO DE DADOS (localStorage) e ESTADO DA SESSÃO ---
+    let lojas = JSON.parse(localStorage.getItem('lojas')) || [];
+    let vendas = JSON.parse(localStorage.getItem('vendas')) || [];
+    let produtos = [];
+    let charts = {};
+    
+    function initializeProdutos() {
+        const produtosPadrao = [
+            { id: 1, modelo: 'Harlley 16', valor: 16000, ultimaAlteracao: null, ativo: true },
+            { id: 2, modelo: 'Grazie', valor: 15000, ultimaAlteracao: null, ativo: true },
+            { id: 3, modelo: 'Retro', valor: 14000, ultimaAlteracao: null, ativo: true },
+            { id: 4, modelo: 'Maggie', valor: 17000, ultimaAlteracao: null, ativo: true },
+            { id: 5, modelo: 'Vitte Plus', valor: 18000, ultimaAlteracao: null, ativo: true },
+            { id: 6, modelo: 'Felice Duo', valor: 19000, ultimaAlteracao: null, ativo: true },
+            { id: 7, modelo: 'Veux', valor: 16500, ultimaAlteracao: null, ativo: true },
+            { id: 8, modelo: 'Bella', valor: 15500, ultimaAlteracao: null, ativo: true },
+            { id: 9, modelo: 'Macchina', valor: 20000, ultimaAlteracao: null, ativo: true }
+        ];
+        
+        let produtosArmazenados = JSON.parse(localStorage.getItem('produtos'));
+
+        if (!produtosArmazenados || produtosArmazenados.length === 0) {
+            produtos = produtosPadrao;
+            localStorage.setItem('produtos', JSON.stringify(produtos));
+        } else {
+            produtos = produtosArmazenados;
+        }
+    }
+
+
+    // --- LÓGICA DE TEMA (MODO ESCURO) ---
+    const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+    const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+    function applyTheme(theme ) {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggleButton.innerHTML = sunIcon;
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            themeToggleButton.innerHTML = moonIcon;
+            localStorage.setItem('theme', 'light');
+        }
+        if (Object.keys(charts).length > 0) {
+            updateDashboard();
+        }
+    }
+
+    themeToggleButton.addEventListener('click', () => {
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+    });
+
+    // --- LÓGICA DE AUTENTICAÇÃO E SESSÃO ---
+    function checkLogin() {
+        applyTheme(localStorage.getItem('theme'));
+        if (sessionStorage.getItem('loggedIn') === 'true') {
+            showApp();
+        } else {
+            showLogin();
+        }
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (username === 'ricardo' && password === '123') {
+            sessionStorage.setItem('loggedIn', 'true');
+            showApp();
+        } else {
+            loginError.classList.remove('hidden');
+        }
+    });
+
+    logoutButton.addEventListener('click', () => {
+        sessionStorage.removeItem('loggedIn');
+        showLogin();
+    });
+
+    function showLogin() {
+        appScreen.classList.add('hidden');
+        loginScreen.classList.remove('hidden');
+        applyTheme(localStorage.getItem('theme'));
+    }
+
+    function showApp() {
+        loginScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
+        initializeApp();
+    }
+
+    // --- INICIALIZAÇÃO DA APLICAÇÃO PRINCIPAL ---
+    function initializeApp() {
+        initializeProdutos();
+        setupNavigation();
+        setupForms();
+        setupProdutosInteractivity();
+        populateFilters();
+        renderAll();
+        updateVendaSemanaChart(getFilteredVendas());
+    }
+
+    // --- NAVEGAÇÃO POR ABAS ---
+    function setupNavigation() {
+        navTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                navTabs.forEach(t => t.classList.remove('active-tab'));
+                tab.classList.add('active-tab');
+                const target = tab.getAttribute('data-tab');
+                tabContents.forEach(content => {
+                    content.classList.remove('active-content');
+                    if (content.id === target) {
+                        content.classList.add('active-content');
+                    }
+                });
+                resetLojaForm();
+                resetVendaForm();
+            });
+        });
+    }
+
+    // --- FEEDBACK VISUAL ---
+    function showFeedbackMessage(element, message) {
+        element.textContent = message;
+        element.classList.remove('hidden');
+        element.classList.add('show');
+        setTimeout(() => {
+            element.classList.remove('show');
+            setTimeout(() => element.classList.add('hidden'), 500);
+        }, 3000);
+    }
+
+    // --- CONFIGURAÇÃO DOS FORMULÁRIOS ---
+    function setupForms() {
+        // Lógica do formulário de Lojas
+        cancelEditLojaBtn.addEventListener('click', resetLojaForm);
+        lojaForm.onsubmit = (e) => {
+            e.preventDefault();
+            const id = lojaEditId.value;
+            const lojaData = {
+                nome: document.getElementById('loja-nome').value,
+                tipo: document.querySelector('input[name="loja-tipo"]:checked').value,
+                dataInauguracao: document.getElementById('loja-data-inauguracao').value,
+                grc: document.getElementById('loja-grc').value
+            };
+
+            let feedbackMessage = '';
+            if (id) {
+                const index = lojas.findIndex(l => l.id == id);
+                if (index > -1) lojas[index] = { ...lojas[index], ...lojaData };
+                feedbackMessage = 'Loja atualizada com sucesso!';
+            } else {
+                lojas.push({ id: Date.now(), ...lojaData });
+                feedbackMessage = 'Loja cadastrada com sucesso!';
+            }
+            
+            localStorage.setItem('lojas', JSON.stringify(lojas));
+            renderTabelaLojas();
+            populateLojasSelect();
+            populateVendasFilters();
+            resetLojaForm();
+            showFeedbackMessage(lojaFeedbackMsg, feedbackMessage);
+        };
+
+        // Lógica do formulário de Vendas
+        cancelEditVendaBtn.addEventListener('click', resetVendaForm);
+        vendaDataInput.valueAsDate = new Date();
+        vendaLojaSelect.onchange = () => {
+            const loja = lojas.find(l => l.id == vendaLojaSelect.value);
+            vendaTipoLojaDisplay.value = loja ? loja.tipo : '';
+        };
+        
+        vendaModeloSelect.onchange = () => {
+            const produto = produtos.find(p => p.modelo === vendaModeloSelect.value);
+            if (produto) {
+                vendaValorInput.value = produto.valor;
+                vendaValorInput.dispatchEvent(new Event('input'));
+            }
+        };
+        
+        const formasPagamento = ["Dinheiro", "Pix", "Crédito 1x", "Crédito 2x", "Crédito 3x", "Crédito 4x", "Crédito 5x", "Crédito 6x", "Crédito 7x", "Crédito 8x", "Crédito 9x", "Crédito 10x", "Crédito 11x", "Crédito 12x"];
+        vendaFormaPagamentoSelect.innerHTML = formasPagamento.map(f => `<option value="${f}">${f}</option>`).join('');
+
+        const calcularVendaTotal = () => {
+            const valor = parseFloat(vendaValorInput.value) || 0;
+            const qtd = parseInt(vendaQuantidadeInput.value) || 0;
+            vendaTotalInput.value = (valor * qtd).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+        vendaValorInput.addEventListener('input', calcularVendaTotal);
+        vendaQuantidadeInput.addEventListener('input', calcularVendaTotal);
+
+        formLancamento.onsubmit = (e) => {
+            e.preventDefault();
+            const id = vendaEditId.value;
+            const lojaSelecionada = lojas.find(l => l.id == vendaLojaSelect.value);
+            const vendaData = {
+                data: vendaDataInput.value,
+                lojaId: vendaLojaSelect.value,
+                tipoLoja: lojaSelecionada ? lojaSelecionada.tipo : '',
+                modelo: vendaModeloSelect.value,
+                valor: parseFloat(vendaValorInput.value),
+                formaPagamento: vendaFormaPagamentoSelect.value,
+                quantidade: parseInt(vendaQuantidadeInput.value)
+            };
+
+            if (id) {
+                const index = vendas.findIndex(v => v.id == id);
+                if (index > -1) vendas[index] = { ...vendas[index], ...vendaData };
+            } else {
+                vendas.push({ id: Date.now(), ...vendaData });
+            }
+            
+            localStorage.setItem('vendas', JSON.stringify(vendas));
+            renderTabelaVendas();
+            updateDashboard();
+            resetVendaForm();
+        };
+
+        exportVendasBtn.addEventListener('click', () => {
+            const vendasParaExportar = getFilteredVendasTabela().map(venda => {
+                const loja = lojas.find(l => l.id == venda.lojaId);
+                return {
+                    Data: venda.data,
+                    Loja: loja ? loja.nome : 'N/A',
+                    Modelo: venda.modelo,
+                    Valor: venda.valor,
+                    Quantidade: venda.quantidade,
+                    Total: (venda.valor * venda.quantidade).toFixed(2)
+                };
+            });
+            if (vendasParaExportar.length > 0) {
+                exportToCsv('vendas.csv', vendasParaExportar);
+            } else {
+                alert('Nenhuma venda para exportar com os filtros atuais.');
+            }
+        });
+        [vendasFilterData, vendasFilterLoja].forEach(el => el.onchange = renderTabelaVendas);
+        clearVendasFiltersBtn.onclick = () => {
+            vendasFilterData.value = '';
+            vendasFilterLoja.value = '';
+            renderTabelaVendas();
+        };
+    }
+
+    // --- FUNÇÕES DE RESET DE FORMULÁRIO ---
+    function resetLojaForm() {
+        lojaForm.reset();
+        lojaEditId.value = '';
+        lojaForm.classList.remove('editing-mode');
+        lojaFormTitle.textContent = 'Cadastrar Nova Loja';
+        lojaSubmitBtn.textContent = 'Cadastrar Loja';
+        cancelEditLojaBtn.classList.add('hidden');
+    }
+
+    function resetVendaForm() {
+        formLancamento.reset();
+        vendaEditId.value = '';
+        formLancamento.classList.remove('editing-mode');
+        vendaFormTitle.textContent = 'Lançar Nova Venda';
+        vendaSubmitBtn.textContent = 'Lançar Venda';
+        cancelEditVendaBtn.classList.add('hidden');
+        vendaDataInput.valueAsDate = new Date();
+        vendaTotalInput.value = '';
+        vendaTipoLojaDisplay.value = '';
+    }
+
+    // --- FUNÇÕES DE EDIÇÃO E EXCLUSÃO ---
+    function editLoja(id) {
+        const loja = lojas.find(l => l.id == id);
+        if (!loja) return;
+        lojaForm.classList.add('editing-mode');
+        lojaEditId.value = loja.id;
+        document.getElementById('loja-nome').value = loja.nome;
+        document.querySelector(`input[name="loja-tipo"][value="${loja.tipo}"]`).checked = true;
+        document.getElementById('loja-data-inauguracao').value = loja.dataInauguracao;
+        document.getElementById('loja-grc').value = loja.grc;
+        lojaFormTitle.textContent = 'Editando Loja';
+        lojaSubmitBtn.textContent = 'Salvar Alteração';
+        cancelEditLojaBtn.classList.remove('hidden');
+        lojaForm.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteLoja(id) {
+        if (confirm('Tem certeza que deseja excluir esta loja? Todas as vendas associadas a ela perderão a referência.')) {
+            lojas = lojas.filter(l => l.id != id);
+            localStorage.setItem('lojas', JSON.stringify(lojas));
+            renderTabelaLojas();
+            updateDashboard();
+        }
+    }
+
+    function editVenda(id) {
+        const venda = vendas.find(v => v.id == id);
+        if (!venda) return;
+        formLancamento.classList.add('editing-mode');
+        vendaEditId.value = venda.id;
+        vendaDataInput.value = venda.data;
+        vendaLojaSelect.value = venda.lojaId;
+        vendaLojaSelect.dispatchEvent(new Event('change'));
+        vendaModeloSelect.value = venda.modelo;
+        vendaValorInput.value = venda.valor;
+        vendaFormaPagamentoSelect.value = venda.formaPagamento;
+        vendaQuantidadeInput.value = venda.quantidade;
+        vendaValorInput.dispatchEvent(new Event('input'));
+        vendaFormTitle.textContent = 'Editando Venda';
+        vendaSubmitBtn.textContent = 'Salvar Alteração';
+        cancelEditVendaBtn.classList.remove('hidden');
+        formLancamento.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteVenda(id) {
+        if (confirm('Tem certeza que deseja excluir esta venda?')) {
+            vendas = vendas.filter(v => v.id != id);
+            localStorage.setItem('vendas', JSON.stringify(vendas));
+            renderTabelaVendas();
+            updateDashboard();
+        }
+    }
+
+    // --- FUNÇÕES DE RENDERIZAÇÃO DE TABELA ---
+    function getFilteredVendasTabela() {
+        const dataFiltro = vendasFilterData.value;
+        const lojaFiltro = vendasFilterLoja.value;
+        return vendas.filter(venda => {
+            const dataMatch = !dataFiltro || venda.data === dataFiltro;
+            const lojaMatch = !lojaFiltro || venda.lojaId == lojaFiltro;
+            return dataMatch && lojaMatch;
+        });
+    }
+
+    function renderTabelaVendas() {
+        const vendasFiltradas = getFilteredVendasTabela();
+        tabelaVendasBody.innerHTML = '';
+        const vendasOrdenadas = [...vendasFiltradas].sort((a, b) => new Date(b.data) - new Date(a.data));
+        
+        vendasOrdenadas.forEach(venda => {
+            const loja = lojas.find(l => l.id == venda.lojaId);
+            const totalVenda = venda.valor * venda.quantidade;
+            const row = `<tr>
+                <td>${new Date(venda.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                <td>${loja ? loja.nome : 'N/A'}</td>
+                <td>${venda.modelo}</td>
+                <td>${venda.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                <td>${venda.quantidade}</td>
+                <td>${totalVenda.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                <td class="actions-cell">
+                    <button class="btn-table-action btn-table-edit" data-id="${venda.id}">Editar</button>
+                    <button class="btn-table-action btn-table-delete" data-id="${venda.id}">Excluir</button>
+                </td>
+            </tr>`;
+            tabelaVendasBody.innerHTML += row;
+        });
+
+        document.querySelectorAll('#tabela-vendas .btn-table-edit').forEach(b => b.onclick = (e) => editVenda(e.target.dataset.id));
+        document.querySelectorAll('#tabela-vendas .btn-table-delete').forEach(b => b.onclick = (e) => deleteVenda(e.target.dataset.id));
+    }
+
+    function renderTabelaLojas() {
+        const totalLojas = lojas.length;
+        if (totalLojas > 0) {
+            const lojasShopping = lojas.filter(l => l.tipo === 'Shopping').length;
+            const lojasRua = lojas.filter(l => l.tipo === 'Rua').length;
+            subtituloLojas.textContent = `${totalLojas} lojas cadastradas, sendo ${lojasShopping} de Shopping e ${lojasRua} de Rua.`;
+        } else {
+            subtituloLojas.textContent = '';
+        }
+
+        tabelaLojasBody.innerHTML = '';
+        lojas.forEach(loja => {
+            const row = `<tr>
+                <td>${loja.nome}</td>
+                <td>${loja.tipo}</td>
+                <td>${new Date(loja.dataInauguracao + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                <td>${loja.grc}</td>
+                <td class="actions-cell">
+                    <button class="btn-table-action btn-table-edit" data-id="${loja.id}">Editar</button>
+                    <button class="btn-table-action btn-table-delete" data-id="${loja.id}">Excluir</button>
+                </td>
+            </tr>`;
+            tabelaLojasBody.innerHTML += row;
+        });
+        document.querySelectorAll('#tabela-lojas .btn-table-edit').forEach(b => b.onclick = (e) => editLoja(e.target.dataset.id));
+        document.querySelectorAll('#tabela-lojas .btn-table-delete').forEach(b => b.onclick = (e) => deleteLoja(e.target.dataset.id));
+    }
+    
+    // --- FUNÇÕES DE POPULAR SELECTS E FILTROS ---
+    function populateLojasSelect() {
+        vendaLojaSelect.innerHTML = '<option value="">Selecione a loja</option>';
+        lojas.forEach(loja => {
+            vendaLojaSelect.innerHTML += `<option value="${loja.id}">${loja.nome}</option>`;
+        });
+    }
+
+    function populateProdutosSelect() {
+        const produtosAtivos = produtos.filter(p => p.ativo);
+        vendaModeloSelect.innerHTML = '<option value="">Selecione o modelo</option>';
+        produtosAtivos.forEach(produto => {
+            vendaModeloSelect.innerHTML += `<option value="${produto.modelo}">${produto.modelo}</option>`;
+        });
+    }
+
+    function populateVendasFilters() {
+        vendasFilterLoja.innerHTML = '<option value="">Todas</option>';
+        lojas.forEach(loja => {
+            vendasFilterLoja.innerHTML += `<option value="${loja.id}">${loja.nome}</option>`;
+        });
+    }
+
+    function exportToCsv(filename, rows) {
+        if (!rows || rows.length === 0) {
+            return;
+        }
+        const processRow = row => Object.values(row).map(val => `"${String(val).replace(/"/g, '""')}"`).join(',');
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + [Object.keys(rows[0]).join(','), ...rows.map(processRow)].join('\n');
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    // ==================================================================
+    // NOVAS FUNÇÕES PARA A ABA DE PRODUTOS
+    // ==================================================================
+    function renderProdutosLista() {
+        produtosListaBody.innerHTML = '';
+        produtos.forEach(produto => {
+            const row = document.createElement('tr');
+            const dataFormatada = produto.ultimaAlteracao 
+                ? new Date(produto.ultimaAlteracao).toLocaleString('pt-BR')
+                : 'Nunca';
+
+            row.innerHTML = `
+                <td>${produto.modelo}</td>
+                <td>
+                    <div class="produto-valor-container">
+                        <span class="produto-valor-display">${produto.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    </div>
+                </td>
+                <td>${dataFormatada}</td>
+                <td>
+                    <span class="status-dot ${produto.ativo ? 'ativo' : 'inativo'}" data-id="${produto.id}" title="${produto.ativo ? 'Ativo' : 'Inativo'}"></span>
+                </td>
+                <td>
+                    <button class="edit-valor-btn" data-id="${produto.id}" title="Editar valor">✏️</button>
+                </td>
+            `;
+            produtosListaBody.appendChild(row);
+        });
+    }
+
+    function setupProdutosInteractivity() {
+        // Lógica do modal de confirmação
+        let confirmCallback = null;
+        modalConfirmBtn.addEventListener('click', () => {
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            modal.classList.add('hidden');
+        });
+        modalCancelBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            renderProdutosLista();
+        });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                renderProdutosLista();
+            }
+        });
+
+        // Lógica para edição de valor e status
+        produtosListaBody.addEventListener('click', (e) => {
+            const target = e.target;
+            
+            // Lógica para o botão de editar valor
+            if (target.closest('.edit-valor-btn')) {
+                const editBtn = target.closest('.edit-valor-btn');
+                const id = editBtn.dataset.id;
+                const produto = produtos.find(p => p.id == id);
+                if (!produto) return;
+
+                const valorContainer = editBtn.closest('tr').querySelector('.produto-valor-container');
+                if (valorContainer.querySelector('input')) return;
+
+                const valorDisplay = valorContainer.querySelector('.produto-valor-display');
+                
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.className = 'produto-valor-input';
+                input.value = produto.valor;
+                
+                valorDisplay.innerHTML = '';
+                valorDisplay.appendChild(input);
+                input.focus();
+                input.select();
+
+                const saveChanges = () => {
+                    const novoValor = parseFloat(input.value);
+                    if (!isNaN(novoValor) && novoValor > 0 && novoValor !== produto.valor) {
+                        modalMessage.textContent = `Deseja alterar o valor de venda do modelo "${produto.modelo}"?`;
+                        modal.classList.remove('hidden');
+                        
+                        confirmCallback = () => {
+                            produto.valor = novoValor;
+                            produto.ultimaAlteracao = new Date().toISOString();
+                            localStorage.setItem('produtos', JSON.stringify(produtos));
+                            renderProdutosLista();
+                            populateProdutosSelect();
+                        };
+                    } else {
+                        renderProdutosLista();
+                    }
+                };
+
+                input.addEventListener('blur', saveChanges);
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') input.blur();
+                    else if (event.key === 'Escape') renderProdutosLista();
+                });
+            }
+
+            // Lógica para o botão de status
+            if (target.classList.contains('status-dot')) {
+                const id = target.dataset.id;
+                const produto = produtos.find(p => p.id == id);
+                if (produto) {
+                    produto.ativo = !produto.ativo;
+                    localStorage.setItem('produtos', JSON.stringify(produtos));
+                    renderProdutosLista();
+                    populateProdutosSelect();
+                }
+            }
+        });
+    }
+
+
+    // --- LÓGICA DO DASHBOARD ---
+    function populateFilters() {
+        const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        filterMonth.innerHTML = '<option value="all">Todos os Meses</option>';
+        meses.forEach((mes, index) => {
+            filterMonth.innerHTML += `<option value="${index}">${mes}</option>`;
+        });
+        const currentYear = new Date().getFullYear();
+        filterYear.innerHTML = '<option value="all">Todos os Anos</option>';
+        for (let i = currentYear; i >= currentYear - 5; i--) {
+            filterYear.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+        filterMonth.value = new Date().getMonth();
+        filterYear.value = currentYear;
+        filterMonth.onchange = updateDashboard;
+        filterYear.onchange = updateDashboard;
+    }
+    
+    function getFilteredVendas() {
+        const selectedMonth = filterMonth.value;
+        const selectedYear = filterYear.value;
+        return vendas.filter(venda => {
+            const vendaDate = new Date(venda.data + 'T00:00:00');
+            const monthMatch = (selectedMonth === 'all') || (vendaDate.getMonth() == selectedMonth);
+            const yearMatch = (selectedYear === 'all') || (vendaDate.getFullYear() == selectedYear);
+            return monthMatch && yearMatch;
+        });
+    }
+
+    function updateDashboard() {
+        const vendasFiltradas = getFilteredVendas();
+        const vendaTotal = vendasFiltradas.reduce((sum, v) => sum + (v.valor * v.quantidade), 0);
+        const totalUnidades = vendasFiltradas.reduce((sum, v) => sum + v.quantidade, 0);
+        const ticketMedio = totalUnidades > 0 ? vendaTotal / totalUnidades : 0;
+        const diasUnicos = new Set(vendasFiltradas.map(v => v.data)).size;
+        const vendaMediaDia = diasUnicos > 0 ? vendaTotal / diasUnicos : 0;
+
+        document.getElementById('card-venda-total').textContent = vendaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        document.getElementById('card-unidades').textContent = totalUnidades;
+        document.getElementById('card-ticket-medio').textContent = ticketMedio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        document.getElementById('card-venda-media').textContent = vendaMediaDia.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        
+        updateRankingLojasChart(vendasFiltradas);
+        updateRankingModeloChart(vendasFiltradas);
+        updateVendaTipoLojaChart(vendasFiltradas);
+        updateVendaFormaPagamentoChart(vendasFiltradas);
+        updateRankingGRCChart(vendasFiltradas);
+        updateParticipacaoChart(vendasFiltradas, totalUnidades);
+        updateVendaDiaChart(vendasFiltradas);
+        updateVendaSemanaChart(vendasFiltradas);
+        updateVendaMensalChart();
+        updateVendaAnualChart();
+    }
+
+    function createChart(ctx, type, data, options) {
+        const chartId = ctx.canvas.id;
+        if (charts[chartId]) charts[chartId].destroy();
+        
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        const textColor = isDarkMode ? '#f0f2f5' : '#172B4D';
+        Chart.defaults.color = textColor;
+        Chart.register(ChartDataLabels);
+
+        const defaultOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { 
+                    ticks: { color: textColor }, 
+                    grid: { color: gridColor, drawBorder: false },
+                    display: options.indexAxis === 'y'
+                },
+                x: { 
+                    ticks: { color: textColor }, 
+                    grid: { color: gridColor, drawBorder: false },
+                    display: options.indexAxis !== 'y'
+                }
+            },
+            plugins: {
+                legend: { labels: { color: textColor } },
+                datalabels: {
+                    color: type === 'bar' ? '#fff' : (isDarkMode ? '#fff' : '#333'),
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: (value) => value > 0 ? value : ''
+                }
+            }
+        };
+
+        const finalOptions = { ...defaultOptions, ...options };
+        if (options.scales) {
+            finalOptions.scales.x = { ...defaultOptions.scales.x, ...options.scales.x };
+            finalOptions.scales.y = { ...defaultOptions.scales.y, ...options.scales.y };
+        }
+        if (options.plugins && options.plugins.datalabels) {
+            finalOptions.plugins.datalabels = { ...defaultOptions.plugins.datalabels, ...options.plugins.datalabels };
+        }
+        if (type === 'pie') {
+            finalOptions.scales = { x: { display: false }, y: { display: false } };
+        }
+
+        charts[chartId] = new Chart(ctx, { type, data, options: finalOptions });
+    }
+
+    function updateRankingModeloChart(vendasFiltradas) {
+        const ctx = document.getElementById('ranking-modelo-chart').getContext('2d');
+        const vendasPorModelo = vendasFiltradas.reduce((acc, v) => {
+            acc[v.modelo] = (acc[v.modelo] || 0) + v.quantidade;
+            return acc;
+        }, {});
+        const sorted = Object.entries(vendasPorModelo).sort(([, a], [, b]) => b - a).slice(0, 10);
+        createChart(ctx, 'bar', {
+            labels: sorted.map(([nome]) => nome),
+            datasets: [{
+                label: 'Unidades Vendidas',
+                data: sorted.map(([, qtd]) => qtd),
+                backgroundColor: 'rgba(94, 108, 132, 0.8)',
+                borderRadius: 4
+            }]
+        }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+    }
+
+    function updateRankingLojasChart(vendasFiltradas) {
+        const ctx = document.getElementById('ranking-lojas-chart').getContext('2d');
+        const vendasPorLoja = vendasFiltradas.reduce((acc, v) => {
+            const loja = lojas.find(l => l.id == v.lojaId);
+            if (loja) acc[loja.nome] = (acc[loja.nome] || 0) + v.quantidade;
+            return acc;
+        }, {});
+        const sortedLojas = Object.entries(vendasPorLoja).sort(([, a], [, b]) => b - a);
+        createChart(ctx, 'bar', {
+            labels: sortedLojas.map(([nome]) => nome),
+            datasets: [{
+                label: 'Unidades Vendidas',
+                data: sortedLojas.map(([, qtd]) => qtd),
+                backgroundColor: 'rgba(94, 108, 132, 0.8)',
+                borderRadius: 4
+            }]
+        }, { indexAxis: 'y', plugins: { legend: { display: false } } });
+    }
+
+    function updateParticipacaoChart(vendasFiltradas, totalUnidades) {
+        const ctx = document.getElementById('participacao-lojas-chart').getContext('2d');
+        const vendasPorLoja = vendasFiltradas.reduce((acc, v) => {
+            const loja = lojas.find(l => l.id == v.lojaId);
+            if (loja) acc[loja.nome] = (acc[loja.nome] || 0) + v.quantidade;
+            return acc;
+        }, {});
+        const sorted = Object.entries(vendasPorLoja).sort(([, a], [, b]) => b - a);
+        
+        createChart(ctx, 'bar', {
+            labels: sorted.map(([nome]) => nome),
+            datasets: [{
+                label: 'Unidades Vendidas',
+                data: sorted.map(([, qtd]) => qtd),
+                backgroundColor: 'rgba(94, 108, 132, 0.8)',
+                borderRadius: 4
+            }]
+        }, {
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (c) => {
+                            const percent = totalUnidades > 0 ? (c.raw / totalUnidades * 100).toFixed(2) : 0;
+                            return `${c.dataset.label}: ${c.raw} (${percent}%)`;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateVendaTipoLojaChart(vendasFiltradas) {
+        const ctx = document.getElementById('venda-tipo-loja-chart').getContext('2d');
+        const vendasPorTipo = vendasFiltradas.reduce((acc, v) => {
+            const loja = lojas.find(l => l.id == v.lojaId);
+            if (loja) acc[loja.tipo] = (acc[loja.tipo] || 0) + v.quantidade;
+            return acc;
+        }, {});
+        const sorted = Object.entries(vendasPorTipo).sort(([, a], [, b]) => b - a);
+        createChart(ctx, 'bar', {
+            labels: sorted.map(([tipo]) => tipo),
+            datasets: [{
+                label: 'Unidades Vendidas',
+                data: sorted.map(([, qtd]) => qtd),
+                backgroundColor: 'rgba(94, 108, 132, 0.8)',
+                borderRadius: 4
+            }]
+        }, { plugins: { legend: { display: false } } });
+    }
+
+
+/* BLOCO ÚNICO: ALTERAÇÃO NO JAVASCRIPT (Gráfico de Pizza)            */
+/* ================================================================== */
+
+function updateVendaFormaPagamentoChart(vendasFiltradas) {
+    const ctx = document.getElementById('venda-forma-pagamento-chart').getContext('2d');
+    const totalUnidades = vendasFiltradas.reduce((sum, v) => sum + v.quantidade, 0);
+    if (totalUnidades === 0) {
+        if (charts[ctx.canvas.id]) charts[ctx.canvas.id].destroy();
+        return;
+    }
+
+    const vendasPorForma = vendasFiltradas.reduce((acc, v) => {
+        acc[v.formaPagamento] = (acc[v.formaPagamento] || 0) + v.quantidade;
+        return acc;
+    }, {});
+    const sorted = Object.entries(vendasPorForma).sort(([, a], [, b]) => b - a);
+    
+    createChart(ctx, 'pie', {
+        labels: sorted.map(([nome]) => nome),
+        datasets: [{
+            data: sorted.map(([, qtd]) => qtd),
+            backgroundColor: ['#0052cc', '#00875A', '#ffab00', '#5E6C84', '#36B37E', '#FF5630', '#6554C0', '#FFC400'],
+            borderColor: document.body.classList.contains('dark-mode') ? '#111111' : '#ffffff',
+            borderWidth: 0,
+            cutout: '30%' // <-- ESTA É A ALTERAÇÃO PARA REDUZIR O TAMANHO DA PIZZA
+        }]
+    }, {
+        scales: { x: { display: false }, y: { display: false } },
+        plugins: {
+            legend: { position: 'left' },
+            datalabels: {
+                display: (context) => {
+                    // Exibe o rótulo apenas se o valor for maior que zero e se não for a legenda
+                    return context.dataset.data[context.dataIndex] > 0 && context.chart.canvas.id !== 'legend';
+                },
+                color: '#fff',
+                formatter: (value, context) => {
+                    const percent = (value / totalUnidades * 100).toFixed(1);
+                    return `${percent}%`;
+                },
+                font: {
+                    weight: 'bold'
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: (c) => `${c.label}: ${c.raw} unidades`
+                }
+            }
+        }
+    });
+}
+
+    function updateRankingGRCChart(vendasFiltradas) {
+        const ctx = document.getElementById('ranking-grc-chart').getContext('2d');
+        const vendasPorGRC = vendasFiltradas.reduce((acc, v) => {
+            const loja = lojas.find(l => l.id == v.lojaId);
+            if (loja && loja.grc) acc[loja.grc] = (acc[loja.grc] || 0) + v.quantidade;
+            return acc;
+        }, {});
+        const sorted = Object.entries(vendasPorGRC).sort(([, a], [, b]) => b - a);
+        createChart(ctx, 'bar', {
+            labels: sorted.map(([grc]) => grc),
+            datasets: [{
+                data: sorted.map(([, qtd]) => qtd),
+                label: 'Unidades Vendidas',
+                backgroundColor: 'rgba(94, 108, 132, 0.8)',
+                borderRadius: 4
+            }]
+        }, { plugins: { legend: { display: false } } });
+    }
+
+    function updateVendaDiaChart(vendasFiltradas) {
+        const ctx = document.getElementById('venda-dia-chart').getContext('2d');
+        const vendasPorDia = vendasFiltradas.reduce((acc, v) => {
+            acc[v.data] = (acc[v.data] || 0) + (v.valor * v.quantidade);
+            return acc;
+        }, {});
+        const sorted = Object.entries(vendasPorDia).sort(([a], [b]) => new Date(a) - new Date(b));
+        createChart(ctx, 'line', {
+            labels: sorted.map(([data]) => new Date(data + 'T00:00:00').toLocaleDateString('pt-BR')),
+            datasets: [{
+                label: 'Venda Total',
+                data: sorted.map(([, val]) => val),
+                borderColor: 'rgba(94, 108, 132, 0.8)',
+                backgroundColor: 'rgba(94, 108, 132, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        }, {
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    align: 'top',
+                    formatter: (value) => value > 0 ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '',
+                    font: { size: 10 }
+                }
+            }
+        });
+    }
+
+    function updateVendaSemanaChart(vendasFiltradas) {
+        const ctx = document.getElementById('venda-semana-chart').getContext('2d');
+        
+        const getWeekNumber = (d) => {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return weekNo;
+        };
+
+        const vendasPorSemana = vendasFiltradas.reduce((acc, v) => {
+            const vendaDate = new Date(v.data + 'T00:00:00');
+            const ano = vendaDate.getFullYear();
+            const semana = getWeekNumber(vendaDate);
+            const chave = `${ano}-S${semana}`;
+            
+            acc[chave] = (acc[chave] || 0) + (v.valor * v.quantidade);
+            return acc;
+        }, {});
+
+        const sorted = Object.entries(vendasPorSemana).sort(([a], [b]) => {
+            const [anoA, semanaA] = a.split('-S').map(Number);
+            const [anoB, semanaB] = b.split('-S').map(Number);
+            if (anoA !== anoB) return anoA - anoB;
+            return semanaA - semanaB;
+        });
+
+        createChart(ctx, 'line', {
+            labels: sorted.map(([chave]) => chave),
+            datasets: [{
+                label: 'Venda Total',
+                data: sorted.map(([, val]) => val),
+                borderColor: 'rgba(94, 108, 132, 0.8)',
+                backgroundColor: 'rgba(94, 108, 132, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        }, {
+            scales: { x: { display: true }, y: { display: true } },
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    align: 'top',
+                    formatter: (value) => value > 0 ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '',
+                    font: { size: 10 }
+                }
+            }
+        });
+    }
+
+    function updateVendaMensalChart() {
+        const ctx = document.getElementById('venda-mensal-chart').getContext('2d');
+        const labels = [];
+        const data = [];
+        let today = new Date();
+
+        for (let i = 11; i >= 0; i--) {
+            let d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const mesAno = d.toLocaleString('pt-BR', { month: 'short', year: '2-digit' });
+            labels.push(mesAno.replace('. de', ''));
+
+            const vendasMes = vendas.filter(v => {
+                const vendaDate = new Date(v.data + 'T00:00:00');
+                return vendaDate.getFullYear() === d.getFullYear() && vendaDate.getMonth() === d.getMonth();
+            }).reduce((sum, v) => sum + (v.valor * v.quantidade), 0);
+            data.push(vendasMes);
+        }
+
+        createChart(ctx, 'bar', {
+            labels: labels,
+            datasets: [{
+                label: 'Venda Total',
+                data: data,
+                backgroundColor: 'rgba(94, 108, 132, 0.8)',
+                borderRadius: 4
+            }]
+        }, {
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    formatter: (value) => value > 0 ? (value / 1000).toFixed(1) + 'k' : ''
+                }
+            }
+        });
+    }
+
+    function updateVendaAnualChart() {
+        const ctx = document.getElementById('venda-anual-chart').getContext('2d');
+        const labels = [];
+        const data = [];
+        const currentYear = new Date().getFullYear();
+
+        for (let i = 5; i >= 0; i--) {
+            const ano = currentYear - i;
+            labels.push(ano);
+            const vendasAno = vendas.filter(v => new Date(v.data).getFullYear() === ano)
+                                    .reduce((sum, v) => sum + (v.valor * v.quantidade), 0);
+            data.push(vendasAno);
+        }
+
+        createChart(ctx, 'bar', {
+            labels: labels,
+            datasets: [{
+                label: 'Venda Total',
+                data: data,
+                backgroundColor: 'rgba(94, 108, 132, 0.8)',
+                borderRadius: 4
+            }]
+        }, {
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    formatter: (value) => value > 0 ? (value / 1000).toFixed(1) + 'k' : ''
+                }
+            }
+        });
+    }
+
+    // --- FUNÇÃO DE RENDERIZAÇÃO INICIAL ---
+    function renderAll() {
+        renderTabelaLojas();
+        renderProdutosLista();
+        populateLojasSelect();
+        populateProdutosSelect();
+        populateVendasFilters();
+        renderTabelaVendas();
+        updateDashboard();
+    }
+
+    // --- PONTO DE ENTRADA DA APLICAÇÃO ---
+    checkLogin();
+});
+</script>
+
+</body>
+</html>
+
+
